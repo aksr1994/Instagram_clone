@@ -1,6 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:insta_clone/Resources/auth_methods.dart';
+import 'package:insta_clone/Responsive/mobile_screen.dart';
+import 'package:insta_clone/Responsive/responsive_layout.dart';
+import 'package:insta_clone/Responsive/web_screen_layout.dart';
+import 'package:insta_clone/Screens/Home/home_screen.dart';
 import 'package:insta_clone/Screens/SignUp/signup_screen.dart';
 import 'package:insta_clone/Widgets/app_textfield.dart';
+import 'package:insta_clone/utilities/utils.dart';
+import 'package:insta_clone/Models/user_model.dart' as model;
 
 
 
@@ -14,6 +21,7 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _emailController=TextEditingController();
   final TextEditingController _passwordController=TextEditingController();
+  bool _isLoading=false;
 
   @override
   void dispose() {
@@ -22,6 +30,37 @@ class _LoginScreenState extends State<LoginScreen> {
     _emailController.dispose();
     _passwordController.dispose();
   }
+
+  void logInUser()async{
+
+    setState(() {
+      _isLoading=true;
+    });
+    String result=await AuthenticationMethods().loginUser(
+        email: _emailController.text,
+        password: _passwordController.text
+    );
+
+    if(result=='success'){
+      //showSnackBar(context, result);
+      if(context.mounted) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+              builder: (context)=>
+                  const ResponsiveLayout(
+                      webScreenLayout: WebScreenLayout(),
+                      mobileScreenLayout: MobileScreenLayout())));
+      }
+    }
+    else{
+
+      if(context.mounted) showSnackBar(context, result);
+    }
+    setState(() {
+      _isLoading=false;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
 
@@ -58,6 +97,7 @@ class _LoginScreenState extends State<LoginScreen> {
               InkWell(
                 onTap: (){
                   print('Login');
+                  logInUser();
                 },
                 child: Container(
                   width: double.infinity,
@@ -67,7 +107,11 @@ class _LoginScreenState extends State<LoginScreen> {
                     borderRadius: BorderRadius.all(Radius.circular(5)),
                     color: Colors.lightBlue
                   ),
-                  child: const Text('Log In'),
+                  child: _isLoading
+                      ?const Center(child: CircularProgressIndicator(
+                              color:Colors.white ,
+                            ))
+                      :const Text('Log In'),
                 ),
               ),
               const SizedBox(height: 12,),

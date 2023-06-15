@@ -1,21 +1,105 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:insta_clone/Models/user_model.dart' as model;
+import 'package:insta_clone/Providers/user_provider.dart';
+import 'package:insta_clone/utilities/colors.dart';
+import 'package:insta_clone/utilities/global_variables.dart';
+import 'package:provider/provider.dart';
 
-class MobileScreenLayout extends StatelessWidget {
+class MobileScreenLayout extends StatefulWidget {
   const MobileScreenLayout({super.key});
 
   @override
+  State<MobileScreenLayout> createState() => _MobileScreenLayoutState();
+}
+
+class _MobileScreenLayoutState extends State<MobileScreenLayout> {
+  int _page=0;
+  late PageController _pageController;
+  String username="";
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _pageController=PageController();
+    getUsername();
+  }
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    _pageController.dispose();
+  }
+
+  void navigationTapped(int page){
+    _pageController.jumpToPage(page);
+  }
+
+  void onPageChanged(int page){
+
+    setState(() {
+      _page=page;
+    });
+
+  }
+
+
+  void getUsername()async{
+    DocumentSnapshot snap=await FirebaseFirestore.instance.collection('users').
+    doc(FirebaseAuth.instance.currentUser!.uid).get();
+    print('User: ${snap.data()}');
+
+    if(mounted) {
+      setState(() {
+      username=(snap.data()as Map<String,dynamic>)['username'];
+    });
+    }
+  }
+  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Mobile'),
-      ),
-      body: ListView.builder(
-        scrollDirection: Axis.vertical,
-        itemCount: 10,
-        itemBuilder: (context,n){
-          return Text('hello');
-        },
-      ),
-    );
+    final model.User? user=Provider.of<UserProvider>(context).getUser;
+    print('User: ${user?.email}');
+
+    if(user==null) {
+      return const Center(
+        child: CircularProgressIndicator(
+          color: Colors.lightBlue,
+        ),
+      );
+    }
+    else{
+      return Scaffold(
+        bottomNavigationBar: CupertinoTabBar(
+          backgroundColor: Colors.black,
+          items: [
+            _navBarItem(0, Icons.home),
+            _navBarItem(1, Icons.search),
+            _navBarItem(2, Icons.add_circle),
+            _navBarItem(3, Icons.favorite),
+            _navBarItem(4, Icons.person)
+          ],
+          onTap: navigationTapped,
+        ),
+        body: PageView(
+          controller: _pageController,
+          physics: const NeverScrollableScrollPhysics(),
+          onPageChanged: onPageChanged,
+          children: homseScreenItems,
+        )
+      );
+    }
+
+
+  }
+
+  BottomNavigationBarItem _navBarItem(int page,IconData icon){
+    return BottomNavigationBarItem(
+        icon: Icon(icon,
+          color: _page==page?primaryColor:secondaryColor,),
+        backgroundColor: primaryColor,
+        label: '');
   }
 }

@@ -3,8 +3,12 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:insta_clone/Resources/auth_methods.dart';
+import 'package:insta_clone/Responsive/mobile_screen.dart';
+import 'package:insta_clone/Responsive/responsive_layout.dart';
+import 'package:insta_clone/Responsive/web_screen_layout.dart';
 import 'package:insta_clone/Widgets/app_textfield.dart';
 import 'package:insta_clone/utilities/utils.dart';
+import 'package:insta_clone/Models/user_model.dart' as model;
 
 
 
@@ -21,6 +25,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final TextEditingController _bioController=TextEditingController();
   final TextEditingController _usernameController=TextEditingController();
   Uint8List? _image;
+  bool _isLoading=false;
 
   @override
   void dispose() {
@@ -39,13 +44,50 @@ class _SignUpScreenState extends State<SignUpScreen> {
       _image=img;
     });
   }
+
+  void signUpUser () async{
+    setState(() {
+      _isLoading=true;
+    });
+    print('SignUp Initiated');
+    String result=await AuthenticationMethods().signUpUser(
+        username: _usernameController.text,
+        email: _emailController.text,
+        password: _passwordController.text,
+        bio: _bioController.text,
+        file: Uint8List.fromList('https://images5.alphacoders.com/447/447126.jpg'.codeUnits));
+
+    print('Result: $result');
+    if(result=='success'){
+      setState(() {
+        _isLoading=false;
+      });
+      print('Navigation');
+      if(context.mounted) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+              builder: (context)=> const ResponsiveLayout(
+                  webScreenLayout: WebScreenLayout(),
+                  mobileScreenLayout: MobileScreenLayout())));
+      }
+
+    }
+    else {
+      print('Result not success');
+      setState(() {
+        _isLoading=false;
+      });
+      if(context.mounted) showSnackBar(context, result);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
 
-    return SafeArea(
-      child: Scaffold(
-        resizeToAvoidBottomInset: false,
-        body: Container(
+    return Scaffold(
+      resizeToAvoidBottomInset: false,
+      body: SafeArea(
+        child: Container(
           padding: const EdgeInsetsDirectional.symmetric(
               horizontal: 32,
           ),
@@ -58,9 +100,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 color: Colors.blue,
                 height: 64,
               ),
-
               const SizedBox(height: 64,),
-              //Circulat Avatar Stack
+
+              //Circular Avatar Stack
               Stack(
                 children: [
                   _image!=null
@@ -68,7 +110,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       radius: 64,
                       backgroundImage:MemoryImage(_image!)
                       )
-                      :CircleAvatar(
+                      :const CircleAvatar(
                         radius: 64,
                         backgroundImage: NetworkImage('https://img.freepik.com/free-photo/puppy-that-is-walking-snow_1340-37228.jpg?w=2000')
                       ),
@@ -121,15 +163,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
               //SignUP Button
               InkWell(
-                onTap: ()async{
-                  print('SignUp Initiated');
-                  String result=await AuthenticationMethods().signUpUser(
-                      username: _usernameController.text,
-                      email: _emailController.text,
-                      password: _passwordController.text,
-                      bio: _bioController.text,
-                      file: Uint8List.fromList('https://images5.alphacoders.com/447/447126.jpg'.codeUnits));
-                },
+                onTap: signUpUser,
                 child: Container(
                   width: double.infinity,
                   alignment: Alignment.center,
@@ -138,31 +172,38 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       borderRadius: BorderRadius.all(Radius.circular(5)),
                       color: Colors.lightBlue
                   ),
-                  child: const Text('Sign Up'),
+                  child: _isLoading
+                      ?const Center(
+                        child:CircularProgressIndicator(
+                          color: Colors.white,
+                        ) ,
+                      )
+                      :const Text('Sign Up'),
                 ),
               ),
               const SizedBox(height: 12,),
               Flexible(child: Container(),flex: 2,),
-              // Container(
-              //   padding: EdgeInsetsDirectional.symmetric(vertical: 12),
-              //   child: Row(
-              //     mainAxisAlignment: MainAxisAlignment.center,
-              //     children: [
-              //       Text("Don't have an account?"),
-              //       GestureDetector(
-              //         onTap: (){
-              //           print('signup');
-              //         },
-              //         child: Text(
-              //           'Sign Up',
-              //           style: TextStyle(
-              //               fontWeight:FontWeight.bold
-              //           ),
-              //         ),
-              //       )
-              //     ],
-              //   ),
-              // )
+              Container(
+                padding: EdgeInsetsDirectional.symmetric(vertical: 12),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text("Already have an account?"),
+                    GestureDetector(
+                      onTap: (){
+                        print('log in');
+                        Navigator.of(context).pop();
+                      },
+                      child: Text(
+                        'Log In',
+                        style: TextStyle(
+                            fontWeight:FontWeight.bold
+                        ),
+                      ),
+                    )
+                  ],
+                ),
+              )
 
             ],
           ),

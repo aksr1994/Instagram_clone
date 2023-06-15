@@ -1,13 +1,18 @@
+import 'package:firebase_app_check/firebase_app_check.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:insta_clone/Providers/user_provider.dart';
 import 'package:insta_clone/Responsive/mobile_screen.dart';
 import 'package:insta_clone/Responsive/responsive_layout.dart';
 import 'package:insta_clone/Responsive/web_screen_layout.dart';
 import 'package:insta_clone/Screens/Login/login_screen.dart';
+import 'package:insta_clone/utilities/colors.dart';
+import 'package:provider/provider.dart';
 
 
-void main() async {
+Future<void> main() async {
 
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -26,6 +31,12 @@ void main() async {
     await Firebase.initializeApp();
   }
 
+  // await FirebaseAppCheck.instance.activate(
+  //   webRecaptchaSiteKey: 'recaptcha-v3-site-key',
+  //   androidProvider: AndroidProvider.debug,
+  //   appleProvider: AppleProvider.appAttest
+  // );
+
 
   runApp(const MyApp());
 }
@@ -36,30 +47,65 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        // This is the theme of your application.
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_)=>UserProvider())
+      ],
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: 'Flutter Demo',
+        theme: ThemeData(
+          // This is the theme of your application.
+          //
+          // TRY THIS: Try running your application with "flutter run". You'll see
+          // the application has a blue toolbar. Then, without quitting the app,
+          // try changing the seedColor in the colorScheme below to Colors.green
+          // and then invoke "hot reload" (save your changes or press the "hot
+          // reload" button in a Flutter-supported IDE, or press "r" if you used
+          // the command line to start the app).
+          //
+          // Notice that the counter didn't reset back to zero; the application
+          // state is not lost during the reload. To reset the state, use hot
+          // restart instead.
+          //
+          // This works for code too, not just values: Most code changes can be
+          // tested with just a hot reload.
+          useMaterial3: true,
+          colorScheme: ColorScheme.dark(
+            primary: primaryColor,
+            secondary: secondaryColor
+          )
+        ),
         //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a blue toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.lightBlue),
-        useMaterial3: true,
+        home: StreamBuilder(
+          stream: FirebaseAuth.instance.authStateChanges(),
+          builder: (context,snapshot){
+            if(snapshot.connectionState==ConnectionState.active){
+              //Snapshot has data
+              if(snapshot.hasData){
+                return const ResponsiveLayout(
+                    webScreenLayout: WebScreenLayout(),
+                    mobileScreenLayout: MobileScreenLayout());
+              }
+              //Connection state made, but snapshot has error
+              else if(snapshot.hasError){
+                return Center(
+                  child: Text('Error:${snapshot.error}'),
+                );
+              }
+            }
+            if(snapshot.connectionState==ConnectionState.waiting){
+              return const Center(
+                child: CircularProgressIndicator(
+                  color: Colors.lightBlue,
+                ),
+              );
+            }
+
+            return const LoginScreen();
+          },
+        ),
       ),
-      //
-      home: LoginScreen(),
     );
   }
 }
