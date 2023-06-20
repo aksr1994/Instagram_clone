@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:uuid/uuid.dart';
 
 
 class StorageMethods{
@@ -17,6 +18,11 @@ class StorageMethods{
     
     //setup upload folder in firebase (childname/uid)
     Reference ref=_storage.ref().child(childname).child(_auth.currentUser!.uid);
+
+    if(isPost){
+      String id=const Uuid().v1();
+      ref=ref.child(id);  //Subfolder with postId under User id folder
+    }
     print('Ref: $ref');
     
     //upload file

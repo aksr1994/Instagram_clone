@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:insta_clone/Resources/auth_methods.dart';
 import 'package:insta_clone/Responsive/mobile_screen.dart';
@@ -24,8 +25,16 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final TextEditingController _passwordController=TextEditingController();
   final TextEditingController _bioController=TextEditingController();
   final TextEditingController _usernameController=TextEditingController();
+  ByteData? _bytes;
   Uint8List? _image;
   bool _isLoading=false;
+  
+  @override
+  void initState(){
+    // TODO: implement initState
+    super.initState();
+    _getDefaultProfilePic();
+  }
 
   @override
   void dispose() {
@@ -35,6 +44,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
     _passwordController.dispose();
     _bioController.dispose();
     _usernameController.dispose();
+  }
+
+  //Convert default profile pic in assets folder to Uint8list
+  _getDefaultProfilePic()async{
+    _bytes=await rootBundle.load('assets/profile_pic.jpg');
+    _image=_bytes?.buffer.asUint8List();
   }
 
   void selectImage()async{
@@ -50,12 +65,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
       _isLoading=true;
     });
     print('SignUp Initiated');
+    print('Profilepic: ${_image?.isEmpty}');
     String result=await AuthenticationMethods().signUpUser(
         username: _usernameController.text,
         email: _emailController.text,
         password: _passwordController.text,
         bio: _bioController.text,
-        file: Uint8List.fromList('https://images5.alphacoders.com/447/447126.jpg'.codeUnits));
+        file: _image!);
 
     print('Result: $result');
     if(result=='success'){
@@ -112,7 +128,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       )
                       :const CircleAvatar(
                         radius: 64,
-                        backgroundImage: NetworkImage('https://img.freepik.com/free-photo/puppy-that-is-walking-snow_1340-37228.jpg?w=2000')
+                        backgroundImage: AssetImage('assets/profile_pic.jpg')
                       ),
                   Positioned(
                     bottom: -10,

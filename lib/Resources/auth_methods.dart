@@ -28,7 +28,7 @@ class AuthenticationMethods{
     required Uint8List file
   })async{
 
-    String result='Some Error Occured!';
+    String result='Some Error Occurred!';
 
     try{
       if(email.isNotEmpty ||username.isNotEmpty|| password.isNotEmpty||bio.isNotEmpty||file!=null){
