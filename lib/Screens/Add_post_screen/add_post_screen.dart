@@ -1,5 +1,4 @@
 import 'dart:typed_data';
-import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -23,11 +22,9 @@ class _AddPostScreenState extends State<AddPostScreen> {
   Uint8List? _file;
   final TextEditingController _descriptionController=TextEditingController();
   bool _isLoading=false;
-  Image? _profilePic;
 
 
   _loadProfilePic(User user){
-    _profilePic=Image.network(user.photoURL);
   }
 
 
