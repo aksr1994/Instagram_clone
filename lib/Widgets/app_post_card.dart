@@ -1,6 +1,13 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:insta_clone/Providers/user_provider.dart';
+import 'package:insta_clone/Resources/firestore_methods.dart';
+import 'package:insta_clone/Widgets/app_like_animation.dart';
 import 'package:insta_clone/utilities/colors.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
+
+import '../Models/user_model.dart' as model;
 
 class AppPostCard extends StatefulWidget {
   const AppPostCard({super.key, required this.snap});
@@ -11,8 +18,15 @@ class AppPostCard extends StatefulWidget {
 }
 
 class _AppPostCardState extends State<AppPostCard> {
+  bool isLikeAnimated=false;
+
+
   @override
   Widget build(BuildContext context) {
+    final model.User? user=Provider.of<UserProvider>(context).getUser;
+
+
+    //print('TEst: ${widget.snap['likes']}');
     return Container(
       color: mobileBackgroundColor,
       padding: const EdgeInsetsDirectional.symmetric(
@@ -24,17 +38,53 @@ class _AppPostCardState extends State<AppPostCard> {
           _postCardHeader(context),
 
           //Image Section
-          SizedBox(
-            height: MediaQuery.of(context).size.height*0.35,
-            width: double.infinity,
-            child: Image.network(
-              widget.snap['postURL'],
-              fit: BoxFit.cover,
+          GestureDetector(
+            onDoubleTap: () async {
+              print('Double tapped');
+              await FireStoreMethods().likePost(
+                  widget.snap['postId'],
+                  user!.uid,
+                  widget.snap['likes']
+              );
+              setState(() {
+                isLikeAnimated=true;
+              });
+            },
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                SizedBox(
+                  height: MediaQuery.of(context).size.height*0.35,
+                  width: double.infinity,
+                  child: Image.network(
+                    widget.snap['postURL'],
+                    fit: BoxFit.cover,
+                  ),
+                ),
+                AnimatedOpacity(
+                  duration: const Duration(milliseconds: 200),
+                  opacity: isLikeAnimated?1:0,
+                  child: AppLikeAnimation(
+                      isAnimated: isLikeAnimated,
+                      duration: const Duration(milliseconds: 400),
+                      onEnd: (){
+                        print('OnEnd');
+                         setState(() {
+                           isLikeAnimated=false;
+                         });
+                    },
+                      child: const Icon(
+                        Icons.favorite,
+                        color: Colors.white,
+                        size: 150,),
+                  ),
+                )
+              ],
             ),
           ),
 
           //Like,Comment Section
-          _likeAndCommentsSection(context),
+          _likeAndCommentsSection(context,user!.uid),
 
           //Description and Comment
           _descriptionAndComments(context)
@@ -100,13 +150,26 @@ class _AppPostCardState extends State<AppPostCard> {
     );
   }
   
-  Widget _likeAndCommentsSection(BuildContext context){
+  Widget _likeAndCommentsSection(BuildContext context,String uid){
     return Row(
       children: [
         //Like Button
-        IconButton(
-            onPressed: (){}, 
-            icon: const Icon(Icons.favorite,color: Colors.red,)
+        AppLikeAnimation(
+          isAnimated: widget.snap['likes'].contains(uid),
+          smallLike: true,
+          child: IconButton(
+              onPressed: ()async{
+                await FireStoreMethods().likePost(
+                    widget.snap['postId'],
+                    uid,
+                    widget.snap['likes']
+                );
+              },
+              icon: widget.snap['likes'].contains(uid)
+                  ?const Icon(Icons.favorite,color: Colors.red,)
+                  :const Icon(Icons.favorite_border,color: Colors.white,)
+          ),
+
         ),
 
         //Comments Button

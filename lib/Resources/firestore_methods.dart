@@ -46,6 +46,28 @@ Future<String> uploadPost(
   return result;
 }
 
+Future<void> likePost(String postId,String uid,List likes)async {
+  try{
+    if(likes.contains(uid)){
+      //Dislike Post (remove current uid from likes field)
+      await _firestore.collection('posts').doc(postId).update({
+        'likes': FieldValue.arrayRemove([uid])
+      });
+    }
+    else{
+      //Like post (add uid to likes array)
+      await _firestore.collection('posts').doc(postId).update({
+        'likes': FieldValue.arrayUnion([uid])
+      });
+    }
+
+
+
+  }catch(e){
+    print('Like Error: ${e.toString()}');
+  }
+}
+
 
 
 }
