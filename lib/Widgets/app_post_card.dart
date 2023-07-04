@@ -1,9 +1,12 @@
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:insta_clone/Providers/user_provider.dart';
 import 'package:insta_clone/Resources/firestore_methods.dart';
+import 'package:insta_clone/Screens/Comments/comments_screen.dart';
 import 'package:insta_clone/Widgets/app_like_animation.dart';
 import 'package:insta_clone/utilities/colors.dart';
+import 'package:insta_clone/utilities/utils.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
@@ -19,12 +22,38 @@ class AppPostCard extends StatefulWidget {
 
 class _AppPostCardState extends State<AppPostCard> {
   bool isLikeAnimated=false;
+  int commentLength=0;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getComments();
+  }
+
+  void getComments()async{
+    try{
+      QuerySnapshot snap=await FirebaseFirestore.instance.
+      collection('posts').
+      doc(widget.snap['postId']).
+      collection('comments').
+      get();
+
+      commentLength=snap.docs.length;
+    }catch(e){
+      print('Fetch comments Error: $e');
+      showSnackBar(context, 'Fetch comments Error: $e');
+    }
+    setState(() {
+
+    });
+
+  }
 
 
   @override
   Widget build(BuildContext context) {
     final model.User? user=Provider.of<UserProvider>(context).getUser;
-
 
     //print('TEst: ${widget.snap['likes']}');
     return Container(
@@ -174,7 +203,12 @@ class _AppPostCardState extends State<AppPostCard> {
 
         //Comments Button
         IconButton(
-            onPressed: (){},
+            onPressed: (){
+              Navigator.of(context).push(
+                  MaterialPageRoute(builder: (context)=>CommentsScreen(
+                    snap:widget.snap
+                  )));
+            },
             icon: const Icon(Icons.comment_outlined)
         ),
 
@@ -237,7 +271,7 @@ class _AppPostCardState extends State<AppPostCard> {
             onTap: (){print('comments more');},
             child: Container(
               padding: const EdgeInsets.symmetric(vertical: 4),
-              child: Text('View all 1000 comments',
+              child: Text('View all $commentLength comments',
                 style: const TextStyle(
                     fontSize: 16,
                     color:secondaryColor ),

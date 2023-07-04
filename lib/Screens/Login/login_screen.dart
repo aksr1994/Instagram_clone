@@ -68,7 +68,7 @@ class _LoginScreenState extends State<LoginScreen> {
       child: Scaffold(
         resizeToAvoidBottomInset: false,
         body: Container(
-          padding: EdgeInsetsDirectional.symmetric(
+          padding: const EdgeInsetsDirectional.symmetric(
             horizontal: 32
           ),
           child: Column(

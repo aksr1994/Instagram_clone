@@ -68,6 +68,31 @@ Future<void> likePost(String postId,String uid,List likes)async {
   }
 }
 
+Future<void> postComment(String postId,String text,String uid,String name,String profilePicture)async{
+  try{
+    if(text.isNotEmpty){
+      String commentId=Uuid().v1();
+      await _firestore.collection('posts').doc(postId).collection('comments').doc(commentId).set({
+        'profilePic':profilePicture,
+        'name':name,
+        'uuid':uid,
+        'text':text,
+        'commentId':commentId,
+        'datePublished':DateTime.now()
+
+      });
+    }else{
+      print('Comment text is empty');
+    }
+
+  }catch(e){
+    print('Comment Post Error: $e');
+  }
+
+
+
+}
+
 
 
 }
