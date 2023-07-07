@@ -89,11 +89,20 @@ Future<void> postComment(String postId,String text,String uid,String name,String
     print('Comment Post Error: $e');
   }
 
-
-
 }
 
+//Delete Post
+Future<void> deletePost(String postId)async{
 
+  try{
+
+   await _firestore.collection('posts').doc(postId).delete();
+
+  }catch(e){
+    print('Delete Post Error: $e');
+  }
+
+}
 
 }
 
