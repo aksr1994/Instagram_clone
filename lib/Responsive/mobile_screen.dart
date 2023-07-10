@@ -87,7 +87,7 @@ class _MobileScreenLayoutState extends State<MobileScreenLayout> {
           controller: _pageController,
           physics: const NeverScrollableScrollPhysics(),
           onPageChanged: onPageChanged,
-          children: homseScreenItems,
+          children: homeScreenItems,
         )
       );
     }
