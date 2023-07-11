@@ -1,6 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:insta_clone/Resources/auth_methods.dart';
+import 'package:insta_clone/Resources/firestore_methods.dart';
+import 'package:insta_clone/Screens/Login/login_screen.dart';
 import 'package:insta_clone/utilities/colors.dart';
 import 'package:insta_clone/utilities/utils.dart';
 
@@ -166,18 +169,54 @@ class _ProfileScreenState extends State<ProfileScreen> {
             children: [
               FirebaseAuth.instance.currentUser!.uid == widget.uid
                   ? AppFollowButton(
-                      onPressed: () {
+                      onPressed: () async {
                         print('follow');
+                        showDialog(
+                            context: context,
+                            builder: (context) {
+                              return AlertDialog(
+                                title: const Text(
+                                  'Are you sure?',
+                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                ),
+                                actions: [
+                                  TextButton(
+                                      onPressed: () async {
+                                        await AuthenticationMethods()
+                                            .signOutUser();
+                                        if (mounted) {
+                                          Navigator.of(context).pushReplacement(
+                                              MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      const LoginScreen()));
+                                        }
+                                      },
+                                      child: const Text('Yes')),
+                                  TextButton(
+                                      onPressed: () {
+                                        Navigator.of(context).pop();
+                                      },
+                                      child: const Text('No'))
+                                ],
+                              );
+                            });
                       },
-                      text: 'Edit Profile',
+                      text: 'Sign Out',
                       backgroundColor: mobileBackgroundColor,
                       textColor: primaryColor,
                       borderColor: Colors.grey,
                     )
                   : isFollowing
                       ? AppFollowButton(
-                          onPressed: () {
+                          onPressed: () async {
                             print('Unfollow');
+                            await FireStoreMethods().followUser(
+                                FirebaseAuth.instance.currentUser!.uid,
+                                userData['uid']);
+                            setState(() {
+                              isFollowing = false;
+                              followerCount--;
+                            });
                           },
                           text: 'Unfollow',
                           backgroundColor: mobileBackgroundColor,
@@ -185,8 +224,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           borderColor: Colors.grey,
                         )
                       : AppFollowButton(
-                          onPressed: () {
+                          onPressed: () async {
                             print('Follow');
+                            await FireStoreMethods().followUser(
+                                FirebaseAuth.instance.currentUser!.uid,
+                                userData['uid']);
+                            setState(() {
+                              isFollowing = true;
+                              followerCount++;
+                            });
                           },
                           text: 'Follow',
                           backgroundColor: Colors.blue,

@@ -118,6 +118,11 @@ class AuthenticationMethods{
     return result;
   }
 
+  //Sign Out Function
+  Future<void> signOutUser() async {
+    await _auth.signOut();
+  }
+
 
 
 
