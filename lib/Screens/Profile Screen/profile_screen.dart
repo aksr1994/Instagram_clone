@@ -21,6 +21,7 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   bool _isLoading = false;
 
+  String uid=FirebaseAuth.instance.currentUser!.uid;
   var userData = null;
   int postLength = 0;
   int followerCount = 0;
@@ -72,6 +73,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     print('UID: ${widget.uid}');
+    print('username: ${FirebaseAuth.instance.currentUser!.uid}');
     return _isLoading
         ? const Center(
             child: CircularProgressIndicator(),

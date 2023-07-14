@@ -60,7 +60,7 @@ class FireStoreMethods {
       String profilePicture) async {
     try {
       if (text.isNotEmpty) {
-        String commentId = Uuid().v1();
+        String commentId = const Uuid().v1();
         await _firestore
             .collection('posts')
             .doc(postId)
@@ -72,13 +72,48 @@ class FireStoreMethods {
           'uuid': uid,
           'text': text,
           'commentId': commentId,
-          'datePublished': DateTime.now()
+          'datePublished': DateTime.now(),
+          'likes': []
         });
       } else {
         print('Comment text is empty');
       }
     } catch (e) {
       print('Comment Post Error: $e');
+    }
+  }
+
+  //Like Comment
+  Future<void> likeComment(
+      {required String postId,
+      required String commentId,
+      required String uid,
+      required List likes}) async {
+    try {
+      //Unlike Comment
+      if (likes.contains(uid)) {
+        await _firestore
+            .collection('posts')
+            .doc(postId)
+            .collection('comments')
+            .doc(commentId)
+            .update({
+          'likes': FieldValue.arrayRemove([uid])
+        });
+      }
+      //Like Comment
+      else {
+        await _firestore
+            .collection('posts')
+            .doc(postId)
+            .collection('comments')
+            .doc(commentId)
+            .update({
+          'likes': FieldValue.arrayUnion([uid])
+        });
+      }
+    } catch (e) {
+      print('Comment Like Error: $e');
     }
   }
 
@@ -125,6 +160,4 @@ class FireStoreMethods {
       print('Follow User Error: $e');
     }
   }
-
-
 }

@@ -104,13 +104,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
       resizeToAvoidBottomInset: false,
       body: SafeArea(
         child: Container(
-          padding: const EdgeInsetsDirectional.symmetric(
+          padding: const EdgeInsets.symmetric(
               horizontal: 32,
           ),
+          width: double.infinity,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Flexible(child: Container(),flex: 2,),
+              Flexible(flex: 2,child: Container(),),
               Image.asset(
                 'assets/ig_logo.png',
                 color: Colors.blue,
@@ -198,19 +199,19 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 ),
               ),
               const SizedBox(height: 12,),
-              Flexible(child: Container(),flex: 2,),
+              Flexible(flex: 2,child: Container(),),
               Container(
-                padding: EdgeInsetsDirectional.symmetric(vertical: 12),
+                padding: const EdgeInsetsDirectional.symmetric(vertical: 12),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text("Already have an account?"),
+                    const Text("Already have an account?"),
                     GestureDetector(
                       onTap: (){
                         print('log in');
                         Navigator.of(context).pop();
                       },
-                      child: Text(
+                      child: const Text(
                         'Log In',
                         style: TextStyle(
                             fontWeight:FontWeight.bold

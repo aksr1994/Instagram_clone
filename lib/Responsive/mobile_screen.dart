@@ -8,6 +8,11 @@ import 'package:insta_clone/utilities/colors.dart';
 import 'package:insta_clone/utilities/global_variables.dart';
 import 'package:provider/provider.dart';
 
+import '../Screens/Add_post_screen/add_post_screen.dart';
+import '../Screens/Feed/feed_screen.dart';
+import '../Screens/Profile Screen/profile_screen.dart';
+import '../Screens/Search/search_screen.dart';
+
 class MobileScreenLayout extends StatefulWidget {
   const MobileScreenLayout({super.key});
 
@@ -19,6 +24,14 @@ class _MobileScreenLayoutState extends State<MobileScreenLayout> {
   int _page=0;
   late PageController _pageController;
   String username="";
+
+  List<Widget> homeScreenItems=[
+    const FeedScreen(),
+    const SearchScreen(),
+    const AddPostScreen(),
+    const Center(child: Text('notification')),
+    ProfileScreen(uid: FirebaseAuth.instance.currentUser!.uid),
+  ];
 
   @override
   void initState() {
@@ -62,6 +75,7 @@ class _MobileScreenLayoutState extends State<MobileScreenLayout> {
   Widget build(BuildContext context) {
     final model.User? user=Provider.of<UserProvider>(context).getUser;
     print('User: ${user?.email}');
+    print('uid_profile: ${FirebaseAuth.instance.currentUser!.uid}');
 
     if(user==null) {
       return const Center(

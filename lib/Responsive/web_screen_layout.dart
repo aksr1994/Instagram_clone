@@ -4,6 +4,10 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:insta_clone/utilities/global_variables.dart';
 
+import '../Screens/Add_post_screen/add_post_screen.dart';
+import '../Screens/Feed/feed_screen.dart';
+import '../Screens/Profile Screen/profile_screen.dart';
+import '../Screens/Search/search_screen.dart';
 import '../utilities/colors.dart';
 
 class WebScreenLayout extends StatefulWidget {
@@ -17,6 +21,14 @@ class _WebScreenLayoutState extends State<WebScreenLayout> {
   int _page = 0;
   late PageController _pageController;
   String username = "";
+
+  List<Widget> homeScreenItems=[
+    const FeedScreen(),
+    const SearchScreen(),
+    const AddPostScreen(),
+    const Center(child: Text('notification')),
+    ProfileScreen(uid: FirebaseAuth.instance.currentUser!.uid),
+  ];
 
   @override
   void initState() {

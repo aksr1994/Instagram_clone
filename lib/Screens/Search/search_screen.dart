@@ -25,7 +25,7 @@ class _SearchScreenState extends State<SearchScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final width=MediaQuery.of(context).size.width;
+    final width = MediaQuery.of(context).size.width;
     return Scaffold(
       appBar: AppBar(
         leading: const Icon(Icons.search),
@@ -91,22 +91,31 @@ class _SearchScreenState extends State<SearchScreen> {
           return const Center(child: CircularProgressIndicator());
         }
 
-        return GridView.custom(
-          gridDelegate: SliverQuiltedGridDelegate(
-              crossAxisCount: 3,
-              mainAxisSpacing: 8,
-              crossAxisSpacing: 8,
-              pattern: [
-                const QuiltedGridTile(2, 2),
-                const QuiltedGridTile(1, 1),
-                const QuiltedGridTile(1, 1),
-                const QuiltedGridTile(1, 2),
-              ]),
-          childrenDelegate: SliverChildBuilderDelegate(
-              (context, index) => Image.network(
-                  (snapshot.data as dynamic).docs[index]['postURL']),
-              childCount: (snapshot.data as dynamic).docs.length),
-        );
+        return GridView.builder(
+            itemCount: (snapshot.data as dynamic).docs.length,
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 3, crossAxisSpacing: 8, mainAxisSpacing: 8),
+            itemBuilder: (context, index) {
+              return Image.network(
+                  (snapshot.data as dynamic).docs[index]['postURL']);
+            });
+
+        // return GridView.custom(
+        //   gridDelegate: SliverQuiltedGridDelegate(
+        //       crossAxisCount: 3,
+        //       mainAxisSpacing: 8,
+        //       crossAxisSpacing: 8,
+        //       pattern: [
+        //         const QuiltedGridTile(2, 2),
+        //         const QuiltedGridTile(1, 1),
+        //         const QuiltedGridTile(1, 1),
+        //         const QuiltedGridTile(1, 2),
+        //       ]),
+        //   childrenDelegate: SliverChildBuilderDelegate(
+        //       (context, index) => Image.network(
+        //           (snapshot.data as dynamic).docs[index]['postURL']),
+        //       childCount: (snapshot.data as dynamic).docs.length),
+        // );
       },
     );
   }
